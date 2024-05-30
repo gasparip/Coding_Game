@@ -1,0 +1,76 @@
+import sys
+import math
+import numpy as np 
+sys.setrecursionlimit(1000)
+
+Size = 9 
+Sudoku = np.zeros((Size,Size),dtype=int)
+Colonne=[]
+
+def debug(*args):
+    for i in range(Size): print(Sudoku[i], file=sys.stderr, flush=True)
+
+def print_sufoku(*args):
+    for i in range(Size):
+        ligne=""
+        for j in range(Size):
+            ligne+=str(Sudoku[i][j])
+        print(ligne)
+def DansLeCarré(Sudo,num,row,col):
+        for i in range(3):
+            for j in range(3):
+                if Sudo[i+3*int(row/3)][j+3*int(col/3)] == num:return True
+                
+        return False
+
+def SurLaLigne(Sudo,num,row):
+    if num in Sudo[row]: return True
+    else : return False
+
+def SurLaColone(Sudo,num,col):
+    for lig in range(Size):
+        if num == Sudo[lig][col]: return True
+    return False
+
+def BonChoix(Sudo,num,col,row):
+    if not(DansLeCarré(Sudo,num,row,col)) and not(SurLaLigne(Sudo,num,row)) and not(SurLaColone(Sudo,num,col)):
+        return True
+    else: return False
+
+def findZeros(Sudo):
+    for ROW in range(Size):
+        for COL in range(Size):
+            if Sudo[ROW][COL] == 0:
+                CO=[ROW,COL]
+                return CO
+    else: return [-1 -1]
+
+def SolveSudoku(Sudo):
+    #global CO
+    CO=[0,0]
+    if findZeros(Sudo)==[-1 -1]:
+        return True #fini 
+    else:
+        CO=findZeros(Sudo)
+    #print(CO, file=sys.stderr, flush=True)
+
+    row = CO[0]
+    col = CO[1]
+    for num in range(1,10):
+        if (BonChoix(Sudo,num,col,row)):
+            Sudo[row][col]=num
+            if SolveSudoku(Sudo):
+                return True
+            Sudo[row][col]=0
+    return False
+
+for lig in range(9):
+    line = str(input())
+    for col in range(len(line)):
+        Sudoku[lig][col]=int(line[col])
+
+if(SolveSudoku(Sudoku)):
+        #debug()
+        print_sufoku()
+else:
+    print ("No solution exists")
