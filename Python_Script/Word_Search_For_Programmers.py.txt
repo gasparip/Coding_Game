@@ -1,0 +1,197 @@
+import sys
+import math
+import numpy as np 
+# Auto-generated code below aims at helping you parse
+# the standard input according to the problem statement.
+
+def debugArr(Matrice):
+    for i in range(len(Matrice[0])):
+        print(Matrice[i], file=sys.stderr, flush=True)
+
+def FindInLigne(Mot,Array,cache):
+    index=0
+    for i in range(len(Array)):
+        BoolHorri = True
+        BoolInver = False
+        ligne = ''
+        ligneInver = '' 
+        for j in range(len(Array)):
+            ligne += Array[i,j]
+        ligneInver = ligne[::-1]
+
+        if Mot in ligne:
+            index=ligne.find(Mot)
+            for k in range(len(Mot)):
+                cache[i][index+k]=1
+            return i,BoolHorri,BoolInver
+        elif Mot in ligneInver:
+            BoolInver=True
+            index=ligneInver.find(Mot)
+            for k in range(len(Mot)):
+                cache[i][len(ligne)-index-k-1]=1
+            return i,BoolHorri,BoolInver
+
+        BoolHorri = False
+        ligne = ''
+        ligneInver = '' 
+        for j in range(len(Array[0])):
+            ligne += Array[j,i]
+        ligneInver = ligne[::-1]
+
+        if Mot in ligne:
+            index=ligne.find(Mot)
+            #print(Mot,ligne,index, file=sys.stderr, flush=True)
+            for k in range(len(Mot)):
+                cache[index+k][i]=1
+            return i,BoolHorri,BoolInver
+        elif Mot in ligneInver:
+            BoolInver=True
+            index=ligneInver.find(Mot)
+            for k in range(len(Mot)):
+                cache[len(ligne)-index-k-1][i]=1
+            return i,BoolHorri,BoolInver
+
+    return -1
+
+def FindDigonal(Mot,Array,cache):
+
+    BoolMont = True
+    k = 0
+    Size = len(Array[0])
+    for numDiag in range(Size*2-1):
+        diag = ''
+        diagInver = ''
+        BoolInver = False
+
+        if numDiag >= Size: 
+            k=numDiag-Size+1
+            for i in range(Size-k):
+                diag += Array[Size-i-1][k+i]
+            diagInver = diag[::-1]
+        else :
+            k=numDiag
+            for i in range(k+1):
+                diag += Array[numDiag-i][i]
+            diagInver = diag[::-1]
+        
+        if Mot in diag:
+            index=diag.find(Mot)
+            #print(Mot,diag,index, file=sys.stderr, flush=True)
+            if numDiag >= Size: 
+                k=numDiag-Size+1
+                for i in range(Size-k):
+                    if i>= index and i <=(index+len(Mot)-1):
+                        cache[Size-i-1][k+i] = 1
+            else :
+                k=numDiag
+                for i in range(k+1):
+                    if i>= index and i <=(index+len(Mot)-1):
+                        cache[numDiag-i][i] = 1
+            return numDiag,BoolMont,BoolInver
+        elif Mot in diagInver:
+            BoolInve=True
+            index=diagInver.find(Mot)
+            #print(Mot,diagInver,index, file=sys.stderr, flush=True)
+            indexI=len(diagInver)-index-len(Mot)
+            if numDiag >= Size: 
+                k=numDiag-Size+1
+                for i in range(Size-k):
+                    if i>= indexI and i <=(indexI+len(Mot)-1):
+                        cache[Size-i-1][k+i] = 1
+            else :
+                k=numDiag
+                for i in range(k+1):
+                    if i>= indexI and i <=(indexI+len(Mot)-1):
+                        cache[numDiag-i][i] = 1
+            return numDiag,BoolMont,BoolInver
+        
+        #print(diag, file=sys.stderr, flush=True)
+    BoolMont = False
+
+    for numDiag in range(Size*2-1):
+        diag = ''
+        diagInver = ''
+        BoolInver = False
+        if numDiag >= Size: 
+            k=numDiag-Size+1
+            for i in range(Size-k):
+                diag += Array[i][k+i]
+            diagInver = diag[::-1]
+        else :
+            k=numDiag
+            for i in range(k+1):
+                diag += Array[Size-k+i-1][i]
+            diagInver = diag[::-1]
+            
+        #print(diag, file=sys.stderr, flush=True)
+        if Mot in diag:
+            index=diag.find(Mot)
+            #print(Mot,diag,index, file=sys.stderr, flush=True)
+            if numDiag >= Size: 
+                k=numDiag-Size+1
+                for i in range(Size-k):
+                    if i >= index and i <=(index+len(Mot)-1):
+                        cache[i][k+i]=1
+            else :
+                k=numDiag
+                for i in range(k+1):
+                    if i >= index and i <=(index+len(Mot)-1):
+                        cache[Size-k+i-1][i]=1
+            return numDiag,BoolMont,BoolInver
+        elif Mot in diagInver:
+            BoolInve=True
+            index=diagInver.find(Mot)
+            #print(Mot,diagInver,index, file=sys.stderr, flush=True)
+            indexI=len(diagInver)-index-len(Mot)
+            if numDiag >= Size: 
+                k=numDiag-Size+1
+                for i in range(Size-k):
+                    if i>= indexI and i <= (indexI+len(Mot)-1):
+                        cache[i][k+i]=1
+            else :
+                k=numDiag
+                for i in range(k+1):
+                    #print(Size-k+i-1,i,indexI, file=sys.stderr, flush=True)
+                    if i>= indexI and i <= (indexI+len(Mot)-1):
+                        cache[Size-k+i-1][i]=1
+                        #print(Size-k+i-1,i,indexI, file=sys.stderr, flush=True)
+            return numDiag,BoolMont,BoolInver
+    return -1
+
+size = int(input())
+#print(size, file=sys.stderr, flush=True)
+Arr = np.full((size, size), "", dtype=str)
+cache = np.zeros((size, size), dtype=int)
+for i in range(size):
+    row = input()
+    print(row, file=sys.stderr, flush=True)
+    for j in range(len(row)):
+        Arr[i][j]=row[j]
+
+debugArr(Arr)
+
+clues = np.array(input().split(' '))
+print(clues, file=sys.stderr, flush=True)
+
+for name in clues:
+    if FindDigonal(name.upper(),Arr,cache) != -1:
+        print('diag:',FindDigonal(name.upper(),Arr,cache), file=sys.stderr, flush=True)
+    elif FindInLigne(name.upper(),Arr,cache) != -1:
+        print('ligne',FindInLigne(name.upper(),Arr,cache), file=sys.stderr, flush=True)
+    else:
+        print('Error')
+debugArr(cache)
+# Write an answer using print
+# To debug: print("Debug messages...", file=sys.stderr, flush=True)
+#print(FindDigonal('lisa'.upper(),Arr), file=sys.stderr, flush=True)
+
+for i in range(size):
+    line=''
+    for j in range(size):
+        if cache[i][j]==1:
+            line+=Arr[i][j]
+        else :
+            line+=' '
+    print(line)
+
+
