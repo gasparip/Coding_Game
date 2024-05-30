@@ -1,0 +1,78 @@
+import sys
+import math
+import numpy as np
+
+number_snails = int(input())
+speed_snail_list = []
+snail_arrive = []
+for i in range(number_snails):
+    speed_snail = int(input())
+    speed_snail_list += [speed_snail]
+map_height = int(input())
+map_width = int(input())
+
+Map_Snake = np.zeros((map_height,map_width),dtype=str)
+
+for i in range(map_height):
+    row = input()
+    print('row',row, file=sys.stderr, flush=True)
+    for j in range(len(row)):
+        Map_Snake[i][j]=row[j]
+
+def debug(*args):
+    for i in range(map_height):
+        print(Map_Snake[i], file=sys.stderr, flush=True)
+
+def get_finish(Map_Snake,snail_arrive):
+    for lin in range(map_height):
+        for cln in range(map_width):
+            if Map_Snake[lin][cln]=='#':
+                snail_arrive+=[[lin,cln]]
+    if snail_arrive==[]:
+        return -1
+    else:
+        return 1
+
+def get_distance_end(Map,snail_arrive,elem):
+    posX=-1
+    posY=-1
+    distance = -1
+    match=False
+    for lin in range(map_height):
+        for cln in range(map_width):
+            if Map[lin][cln]==str(elem):
+                posX=cln
+                posY=lin
+                match=True
+                break
+        if match:
+            break
+    if match:
+        for y,x in snail_arrive:
+            dis=abs(posY-y)+abs(posX-x)
+            if dis < distance or distance == -1:
+                distance = dis
+        return distance
+    else:
+        return -1
+
+winner=-1
+temps_save=-1
+#debug()
+if get_finish(Map_Snake,snail_arrive):
+    
+    for elem in range(1,number_snails+1):
+        dis = get_distance_end(Map_Snake,snail_arrive,elem)
+        if dis == -1:
+            print('Probleme')
+        else :
+            temps = dis/speed_snail_list[elem-1]
+            if winner == -1 :
+                temps_save = temps
+                winner = elem
+            elif temps < temps_save:
+                winner = elem
+                temps_save=temps
+    print(winner)       
+else: 
+    print('No finish')
